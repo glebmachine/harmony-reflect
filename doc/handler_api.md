@@ -19,19 +19,20 @@ This API documents all the functions that a proxy handler object may implement t
 
 As an example, the below proxy logs all `get` and `set` operations applied to it, then forwards the operations to its target object:
 
-    var proxy = new Proxy({}, {
-      // intercepts proxy[name]
-      get: function(target, name, receiver) {
-        console.log('get',name);
-        return Reflect.get(target, name, receiver);
-      },
-      // intercepts proxy[name] = value
-      set: function(target, name, value, receiver) {
-        console.log('set',name,value);
-        return Reflect.set(target, name, value, receiver);
-      }
-    });
-    
+```js
+  var proxy = new Proxy({}, {
+    // intercepts proxy[name]
+    get: function(target, name, receiver) {
+      console.log('get',name);
+      return Reflect.get(target, name, receiver);
+    },
+    // intercepts proxy[name] = value
+    set: function(target, name, value, receiver) {
+      console.log('set',name,value);
+      return Reflect.set(target, name, value, receiver);
+    }
+  });
+ ```
 All traps are *optional*: if missing, the proxy will *automatically* apply the intercepted operation to its `target` object.
 
 ## get(target, name, receiver)
@@ -139,33 +140,33 @@ The proxy throws a TypeError if:
   *  This trap returns a non-configurable property that is configurable or doesn't exist on `target`. A non-configurable property can only be exposed if the `target` object has a corresponding non-configurable property.
   
 Examples:
-
-    var target = { x: 0 };
-    var handler = {
-      getOwnPropertyDescriptor: function(target, name) {
-        if (name === "y") {
-          return {value: 1, configurable: true};
-        } else {
-          return Reflect.getOwnPropertyDescriptor(target, name);
-        }
+```js
+  var target = { x: 0 };
+  var handler = {
+    getOwnPropertyDescriptor: function(target, name) {
+      if (name === "y") {
+        return {value: 1, configurable: true};
+      } else {
+        return Reflect.getOwnPropertyDescriptor(target, name);
       }
-    };
-    var proxy = new Proxy(target, handler);
-    Object.getOwnPropertyDescriptor(proxy, "x")
-      // calls handler.getOwnPropertyDescriptor(target, "x")
-      // returns {value: 0, writable: true, configurable: true, enumerable: true}
-    Object.getOwnPropertyDescriptor(proxy, "y")
-      // calls handler.getOwnPropertyDescriptor(target, "y")
-      // returns {value: 1, writable: false, configurable: true, enumerable: false}
-    Object.getOwnPropertyDescriptor(proxy, "z")
-      // calls handler.getOwnPropertyDescriptor(target, "z")
-      // returns undefined
-
-    Object.defineProperty(target, "y", {value:2,configurable:false});
-    Object.getOwnPropertyDescriptor(proxy, "y")
-      // calls handler.getOwnPropertyDescriptor(target, "y")
-      // throws TypeError: trap returns an incompatible descriptor
-    
+    }
+  };
+  var proxy = new Proxy(target, handler);
+  Object.getOwnPropertyDescriptor(proxy, "x")
+    // calls handler.getOwnPropertyDescriptor(target, "x")
+    // returns {value: 0, writable: true, configurable: true, enumerable: true}
+  Object.getOwnPropertyDescriptor(proxy, "y")
+    // calls handler.getOwnPropertyDescriptor(target, "y")
+    // returns {value: 1, writable: false, configurable: true, enumerable: false}
+  Object.getOwnPropertyDescriptor(proxy, "z")
+    // calls handler.getOwnPropertyDescriptor(target, "z")
+    // returns undefined
+ 
+  Object.defineProperty(target, "y", {value:2,configurable:false});
+  Object.getOwnPropertyDescriptor(proxy, "y")
+    // calls handler.getOwnPropertyDescriptor(target, "y")
+    // throws TypeError: trap returns an incompatible descriptor
+ ``` 
 
 ## defineProperty(target, name, desc)
 
